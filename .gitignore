@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.build/
+dist/
+.eggs/
+
+# Virtual envs
+.venv/
+venv/
+.gdg_usyd/
+
+# Editor/OS
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+# Env & credentials
+.env
+.env.*
+*.secret.*
+*.key
+
+# ADK artifacts & cache
+adk_artifacts/
+artifacts/
+.adk/
+.adk_cache/
+*.log
+
+# Generated media (keep your /images examples tracked)
+artifacts/**/*.png
+artifacts/**/*.jpg
