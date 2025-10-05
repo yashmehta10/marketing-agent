@@ -3,20 +3,22 @@
 Google Cloud 
 Cloud Shell
 
+TODO: Activate Vertex AI API
+
 1. Create and activate virtual environment 
 ```bash
  python3 -m venv .gdg_usyd && source .gdg_usyd/bin/activate
  ```
 
- 2. Install Google ADK 
- ```bash
- pip install google-adk
- ```
+2. Install Google ADK 
+```bash
+pip install google-adk
+```
 
- 3. Initialise ADK project 
- ```bash
- adk create marketing-agent
- ```
+3. Initialise ADK project 
+```bash
+adk create marketing-agent
+```
 
  Follow the prompts 
  a. select 1. gemini-2.5-flash
@@ -34,13 +36,16 @@ Cloud Shell
 Ensure you select the correct Agent on the top left
 ![adk web UI](images/adk_web_UI.png "adk web UI")
 
-5. Prompting 
+5. Prompting
+In your agent.py file update the instruction to
 ```markdown
+instruction='''
 You are Marketing Assistant, a strategic yet hands-on partner that plans, creates, and optimizes marketing for measurable growth while keeping brand consistency.
 If key inputs are missing, briefly ask for goal, audience, and KPI—otherwise proceed.
 Deliver concise, ready-to-ship assets (respect platform limits) and clearly mark assumptions vs facts.
 Provide 3 creative variations with a one-sentence hypothesis on which might win and why.
 Respond using sections: Summary, Deliverables, Variations, Distribution & Measurement, Next Actions, Sources.
+'''
 ```
 
 Start with this question
@@ -54,7 +59,7 @@ KPIs: Number of attendees and new sign-ups
 7. Tooling - Google Search
 Lets provide the Agent access to the internet and allow it to research relevant information from the web
 
-    a. ADK inbuilt google search tool
+    a. Import ADK's inbuilt google search tool in your agent.py file
     ```python
     from google.adk.tools import google_search
     ```
@@ -68,7 +73,12 @@ Lets provide the Agent access to the internet and allow it to research relevant 
         Respond using sections: Summary, Deliverables, Variations, Distribution & Measurement, Next Actions, Sources.
     ```
 
-    c. Reuse the same question and see the difference
+    c. Register the tool with your agent
+    ```python
+        tools=[google_search]
+    ```
+
+    d. Reuse the same question and see the difference
     ```markdown
         Hi, I am hosting a GDG on campus event to build AI Agents. Can you please create a 1 page brief?
         Goal: To educate and upskill students.
@@ -89,8 +99,7 @@ Lets provide the Agent access to Imagen to generate marketing posters
     import os 
     ```
 
-    b. Define a a tool to use Imagen 
-    To avoid excess charges and quickly iterate with some designs, lets use Imagen 3 Fast
+    b. Define a a tool to use Imagen. To avoid excess charges and quickly iterate with some designs, lets use Imagen 3 Fast. Ensure you you paste this function above the Agent definition. 
     ```python
 
     MODEL = "gemini-2.5-flash"
@@ -106,30 +115,37 @@ Lets provide the Agent access to Imagen to generate marketing posters
     )
 
     async def generate_image(img_prompt: str, tool_context: "ToolContext"):
-    """Generates an image based on the prompt provided to this tool"""
-    response = client.models.generate_images(
-        model=IMAGE_MODEL,
-        prompt=img_prompt,
-        config={"number_of_images": 1},
-    )
-    if not response.generated_images:
-        return {"status": "failed"}
-    image_bytes = response.generated_images[0].image.image_bytes
-    await tool_context.save_artifact(
-        "image.png",
-        types.Part.from_bytes(data=image_bytes, mime_type="image/png"),
-    )
-    return {
-        "status": "success",
-        "detail": "Image generated successfully and stored in artifacts.",
-        "filename": "image.png",
-    }
+        """Generates an image based on the prompt provided to this tool"""
+        response = client.models.generate_images(
+            model=IMAGE_MODEL,
+            prompt=img_prompt,
+            config={"number_of_images": 1},
+        )
+        if not response.generated_images:
+            return {"status": "failed"}
+        image_bytes = response.generated_images[0].image.image_bytes
+        await tool_context.save_artifact(
+            "image.png",
+            types.Part.from_bytes(data=image_bytes, mime_type="image/png"),
+        )
+        return {
+            "status": "success",
+            "detail": "Image generated successfully and stored in artifacts.",
+            "filename": "image.png",
+        }
     ``` 
 
     c. Add these new functions to the Agent 
     ```python 
     tools=[generate_image, load_artifacts, google_search]
     ```
+
+    c. Run the Agent 
+    ```bash
+        adk web
+    ```
+
+    TODO: reuse this question. 
 
     ```json
     {
@@ -145,9 +161,13 @@ Lets provide the Agent access to Imagen to generate marketing posters
     ```
 
     d. This is a known caveat for using inbuilt tools with ADK. We need to expose another Agent as tool
+    Import this method
     ```python 
     from google.adk.tools.agent_tool import AgentTool
+    ```
 
+    e. Create a specialised agent responsible for searching 
+    ```python 
     search_agent = Agent(
         model='gemini-2.0-flash',
         name='SearchAgent',
@@ -156,7 +176,10 @@ Lets provide the Agent access to Imagen to generate marketing posters
         """,
         tools=[google_search],
     )
+    ```
 
+    f. Update the existing root_agent with this definition 
+    ```python 
     root_agent = Agent(
         model=MODEL,
         name='root_agent',
@@ -172,7 +195,7 @@ Lets provide the Agent access to Imagen to generate marketing posters
     )
     ```
 
-    e. Reuse the same question and see the difference
+    g. Reuse the same question and see the difference
     ```markdown
         Hi, I am hosting a GDG on campus event to build AI Agents. Can you please create a 1 page brief?
         Goal: To educate and upskill students.
@@ -180,9 +203,10 @@ Lets provide the Agent access to Imagen to generate marketing posters
         KPIs: Number of attendees and new sign-ups
     ```
 
+    h. Once you are happy with this result. Ask the agent to generate a poster for this event. 
     ![Example](images/example.png "Example Image")
 
-    Now try uploading a reference image and direct the LLM to create something similar 
+    i. With Gemini familiy's multimodal capabilities, you can ask the Agent to take inspiration from an existing image. Try uploading a reference image and direct the LLM to create something similar 
     ![Example 2](images/example_2.png "Example Image")
 
 
