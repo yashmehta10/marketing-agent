@@ -56,15 +56,17 @@ Audience: Students starting their AI journey.
 KPIs: Number of attendees and new sign-ups
 ```
 
+Once you are happy with this result, end the server using `ctrl+c` in your terminal window. 
+
 7. Tooling - Google Search
 Lets provide the Agent access to the internet and allow it to research relevant information from the web
 
-    a. Import ADK's inbuilt google search tool in your agent.py file
+    a. Import ADK's inbuilt google search tool in your `agent.py` file
     ```python
     from google.adk.tools import google_search
     ```
 
-    b. Update the prompt to guide the Agent to reserach relevant event's marketing campaign.
+    b. Update the instruction in your Agent definition to guide the Agent to reserach relevant event's marketing campaign.
     ```markdown
         You are Marketing Assistant, a strategic yet hands-on partner that plans, creates, and optimizes marketing for measurable growth while keeping brand consistency. Ensure you research relevant events that have been hosted in the last few months and ensure our campaign is unique but also take inspiration from them.
         If key inputs are missing, briefly ask for goal, audience, and KPI—otherwise proceed.
@@ -85,11 +87,12 @@ Lets provide the Agent access to the internet and allow it to research relevant 
         Audience: Students starting their AI journey.
         KPIs: Number of attendees and new sign-ups
     ```
+    Once you are happy with this result, end the server using `ctrl+c` in your terminal window. 
 
 8. Tooling - Imagen 
 Lets provide the Agent access to Imagen to generate marketing posters
 
-    a. Import necessary packages
+    a. Import necessary packages in your `agent.py` file
     ```python
     from google.adk.agents.llm_agent import Agent
     from google.adk.tools import google_search, ToolContext, load_artifacts
@@ -145,7 +148,14 @@ Lets provide the Agent access to Imagen to generate marketing posters
         adk web
     ```
 
-    TODO: reuse this question. 
+    Reuse the same question and see the difference
+    ```markdown
+        Hi, I am hosting a GDG on campus event to build AI Agents. Can you please create a 1 page brief?
+        Goal: To educate and upskill students.
+        Audience: Students starting their AI journey.
+        KPIs: Number of attendees and new sign-ups
+    ```
+    Once you are happy with this result, end the server using `ctrl+c` in your terminal window. 
 
     ```json
     {
@@ -160,13 +170,12 @@ Lets provide the Agent access to Imagen to generate marketing posters
     }
     ```
 
-    d. This is a known caveat for using inbuilt tools with ADK. We need to expose another Agent as tool
-    Import this method
+    d. This is a known caveat for using inbuilt tools with ADK. We need to expose another Agent as tool, import this method
     ```python 
     from google.adk.tools.agent_tool import AgentTool
     ```
 
-    e. Create a specialised agent responsible for searching 
+    e. Create a specialised agent responsible for searching. Create this agent before your root agent so you can use this in your root agent.
     ```python 
     search_agent = Agent(
         model='gemini-2.0-flash',
